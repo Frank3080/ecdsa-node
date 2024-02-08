@@ -15,7 +15,7 @@ function App() {
         setBalance={setBalance}
         address={address}
         setAddress={setAddress}
-        privateKey={privatekey}
+        privateKey={privateKey}
         setPrivateKey={setPrivateKey}
       />
       <Transfer

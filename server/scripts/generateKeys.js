@@ -3,8 +3,7 @@ const { toHex } = require("ethereum-cryptography/utils");
 
 const privateKey = secp.secp256k1.utils.randomPrivateKey();
 
-console.log("Private key: ", toHex(privateKey.slice(1)).slice(-20));
-
 const publicKey = secp.secp256k1.getPublicKey(privateKey);
 
-console.log("Public key: ", toHex(publicKey.slice(1)).slice(-20));
+console.log("Private key:", toHex(privateKey));
+console.log("Public key: ", toHex(publicKey));

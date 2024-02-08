@@ -6,29 +6,45 @@ import * as secp from "ethereum-cryptography/secp256k1";
 
 import server from "./server";
 
-function Transfer({ address, setBalance, privateKey }) {
+function Transfer({ setBalance, privateKey }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 
   const setValue = (setter) => (e) => setter(e.target.value);
 
-  const hashMsg = (msg) => keccak256(Uint8Array.from(message));
-  const signMsg = (msg) => secp256k1.sign(hashMsg(msg), privateKey);
-
   async function transfer(e) {
     e.preventDefault();
 
-    try {
-      const {
-        data: { balance },
-      } = await server.post(`send`, {
-        sender: address,
+    if (!privateKey) {
+      alert("Missing wallet!");
+      return;
+    }
+
+    if (confirm("Sign message")) {
+      const body = {
         amount: parseInt(sendAmount),
         recipient,
-      });
-      setBalance(balance);
-    } catch (ex) {
-      alert(ex.response.data.message);
+      };
+      const msgHash = hashMessage(body);
+      const signature = secp256k1.sign(msgHash, privateKey);
+      const publicAddress = signature.recoverPublicKey(msgHash).toHex();
+      try {
+        const {
+          data: { balance },
+        } = await server.post(`send`, {
+          ...body,
+          signature: JSON.parse(
+            JSON.stringify(signature, (key, value) =>
+              typeof value === "bigint" ? value.toString() : value
+            )
+          ),
+          msgHash,
+          publicAddress,
+        });
+        setBalance(balance);
+      } catch (ex) {
+        alert(ex.response.data.message);
+      }
     }
   }
 
